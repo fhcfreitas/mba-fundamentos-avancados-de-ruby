@@ -1,4 +1,6 @@
 class Task < ApplicationRecord
+  include SoftDeletable
+
   validates :title, :description, :status, presence: true
 
   enum :status, { ongoing: 0, overdue: 1, completed: 2, cancelled: 3 }

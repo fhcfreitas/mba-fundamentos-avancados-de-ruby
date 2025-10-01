@@ -33,7 +33,8 @@ class TasksController < ApplicationController
   # DELETE /tasks/:id
   def destroy
     @task = Task.find(params[:id])
-    if @task.update(deleted_at: Time.current, status: :cancelled)
+    debugger
+    if @task.soft_delete
       head :no_content
     else
       render json: @task.errors, status: :unprocessable_entity
