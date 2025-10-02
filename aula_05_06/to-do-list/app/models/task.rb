@@ -7,4 +7,8 @@ class Task < ApplicationRecord
 
   scope :deleted, -> { where.not(deleted_at: nil) }
   scope :not_deleted, -> { where(deleted_at: nil) }
+
+  def self.ransackable_attributes(_auth_object = nil)
+    [ "created_at", "deleted_at", "description", "due_date", "id", "status", "title", "updated_at" ]
+  end
 end

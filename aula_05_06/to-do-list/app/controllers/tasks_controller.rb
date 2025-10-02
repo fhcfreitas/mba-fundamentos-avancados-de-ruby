@@ -1,6 +1,7 @@
 class TasksController < ApplicationController
   def index
-    @tasks = Task.not_deleted
+    q = Task.not_deleted.ransack(params[:q])
+    @tasks = q.result(distinct: true)
     render json: @tasks
   end
 
