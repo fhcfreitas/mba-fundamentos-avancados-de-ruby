@@ -34,7 +34,6 @@ class TasksController < ApplicationController
   # DELETE /tasks/:id
   def destroy
     @task = Task.find(params[:id])
-    debugger
     if @task.soft_delete
       head :no_content
     else
