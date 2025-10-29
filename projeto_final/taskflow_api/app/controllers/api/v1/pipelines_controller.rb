@@ -11,7 +11,13 @@ module Api
       # GET /pipelines/:id
       def show
         @pipeline = Pipeline.find(params[:id])
-        render json: @pipeline
+        render json: @pipeline.as_json(
+          include: {
+            tasks: {
+              except: [:created_at, :updated_at, :pipeline_id]
+            }
+          }
+        )
       end
 
       # POST /pipelines

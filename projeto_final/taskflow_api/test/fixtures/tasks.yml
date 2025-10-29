@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pipeline: one
+  name: MyString
+  task_type: MyString
+  params: 
+  position: 1
+  depends_on: MyString
+
+two:
+  pipeline: two
+  name: MyString
+  task_type: MyString
+  params: 
+  position: 1
+  depends_on: MyString
