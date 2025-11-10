@@ -1,8 +1,7 @@
-
 module Api
   module V1
     class PipelinesController < ApplicationController
-    # GET /pipelines
+      # GET /pipelines
       def index
         @pipelines = Pipeline.active
         render json: @pipelines
@@ -14,7 +13,7 @@ module Api
         render json: @pipeline.as_json(
           include: {
             tasks: {
-              except: [:created_at, :updated_at, :pipeline_id]
+              except: [ :created_at, :updated_at, :pipeline_id ]
             }
           }
         )
@@ -30,26 +29,10 @@ module Api
         end
       end
 
-      # PUT /pipelines/:id
-      def update
-        @pipeline = Pipeline.find(params[:id])
-        if @pipeline.update(pipeline_params)
-          render json: @pipeline
-        else
-          render json: @pipeline.errors, status: :unprocessable_entity
-        end
-      end
-
-      def destroy
-        @pipeline = Pipeline.find(params[:id])
-        @pipeline.update(status: false)
-        head :no_content
-      end
-
       private
 
       def pipeline_params
-        params.require(:pipeline).permit(:name, :description, :configuration, :status)
+        params.require(:pipeline).permit(:name, :description, configuration: {})
       end
     end
   end
