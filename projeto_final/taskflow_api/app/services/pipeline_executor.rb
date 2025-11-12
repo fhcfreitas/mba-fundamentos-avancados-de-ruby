@@ -1,6 +1,3 @@
-require 'net/http'
-require 'uri'
-
 class PipelineExecutor
   attr_reader :pipeline, :results
 
@@ -21,7 +18,7 @@ class PipelineExecutor
     execute_concurrently(independent_tasks)
     execute_sequentially(dependent_tasks)
 
-    @results
+    ResultsProcessor.new(@results).process
   end
 
   private
@@ -37,7 +34,7 @@ class PipelineExecutor
   end
 
   def execute_sequentially(tasks)
-    successful = @results.select { |res| res[:status] == 'success' }.map { |res| res[:task_name] }.to_set
+    successful = @results.select { |res| res[:status] == "success" }.map { |res| res[:task_name] }.to_set
 
     tasks.each do |task|
       dependencies_met = task.depends_on.all? { |dep_name| successful.include?(dep_name) }
@@ -46,15 +43,15 @@ class PipelineExecutor
         result = execute_task(task)
         @mutex.synchronize do
           @results << result
-          successful << task.name if result[:status] == 'success'
+          successful << task.name if result[:status] == "success"
         end
       else
         @mutex.synchronize do
           @results << {
             task_id: task.id,
             task_name: task.name,
-            status: 'skipped',
-            reason: 'Unmet dependencies',
+            status: "skipped",
+            reason: "Unmet dependencies",
             executed_at: Time.current
           }
         end
@@ -66,11 +63,11 @@ class PipelineExecutor
     start_time = Time.now
 
     output = case task.task_type
-    when 'http_request'
+    when "http_request"
       perform_http_request(task.params)
-    when 'data_processing'
+    when "data_processing"
       perform_data_processing(task.params)
-    when 'email_sending'
+    when "email_sending"
       perform_email_sending(task.params)
     else
       raise "Unknown task type: #{task.task_type}"
@@ -80,7 +77,7 @@ class PipelineExecutor
       task_id: task.id,
       task_name: task.name,
       task_type: task.task_type,
-      status: 'success',
+      status: "success",
       output: output,
       duration: (Time.current - start_time).round(3),
       executed_at: Time.current,
@@ -90,26 +87,41 @@ class PipelineExecutor
     {
       task_id: task.id,
       task_name: task.name,
-      status: 'failed',
+      status: "failed",
       error: e.message,
       executed_at: Time.current
     }
   end
 
   def perform_http_request(params)
-    uri = URI(params['url'])
-    response = Net::HTTP.get_response(uri)
-    { code: response.code, body: response.body }
+    sleep(rand(0.1..0.5))
+    {
+      url: params["url"],
+      code: 200,
+      body: { data: "simulated response", size: 1024 },
+      timestamp: Time.current
+    }
   end
 
   def perform_data_processing(params)
-    data = params['data']
-    processed_data = data.reverse # Example processing
-    { processed_data: processed_data }
+    sleep(rand(0.1..0.3))
+    data = params["data"] || "default_data"
+    {
+      original: data,
+      processed: data.reverse,
+      length: data.length,
+      operation: params["operation"] || "reverse"
+    }
   end
 
   def perform_email_sending(params)
-    # Simulate email sending
-    { to: params['to'], subject: params['subject'], status: 'sent' }
+    sleep(rand(0.2..0.4))
+    {
+      to: params["to"],
+      subject: params["subject"],
+      status: "sent",
+      sent_at: Time.current,
+      message_id: SecureRandom.uuid
+    }
   end
 end
